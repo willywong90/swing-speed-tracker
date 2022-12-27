@@ -4,17 +4,15 @@ private const val MS_TO_MPH_CONVERSION = 2.23694
 private val CLUB_LABEL = listOf("W1", "W3", "W5", "W7", "W9", "U2", "U3", "U4", "U5", "U6", "I3", "I4", "I5", "I6", "I7", "I8", "I9", "PW", "AW", "Sw", "LW", "PT")
 
 class TrackerData(
-    clubHeadSpeed: Double,
-    ballSpeed: Double,
+    val clubSpeed: Double,
+    val ballSpeed: Double,
     distance: Double,
-    club: Int
+    private val club: Int
 ) {
-    val club: Int = club
-
-    val clubHeadSpeed: Double = clubHeadSpeed
+    val clubSpeedMph: Double = clubSpeed
         get() = field * MS_TO_MPH_CONVERSION
 
-    val ballSpeed: Double = ballSpeed
+    val ballSpeedMph: Double = ballSpeed
         get() = field * MS_TO_MPH_CONVERSION
 
     val carry: Double = distance
@@ -25,11 +23,11 @@ class TrackerData(
             }
 
     val smashFactor: Double
-        get() = if (ballSpeed == 0.0 || clubHeadSpeed == 0.0) {
+        get() = if (ballSpeed == 0.0 || clubSpeed == 0.0) {
                     0.0
                 }
             else {
-                ballSpeed/clubHeadSpeed
+                ballSpeed/clubSpeed
             }
 
     val carryUnit: String
