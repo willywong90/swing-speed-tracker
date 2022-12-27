@@ -22,13 +22,14 @@ private val DarkColorPalette = darkColors(
 )
 
 private val LightColorPalette = lightColors(
-    primary = Purple500,
-    primaryVariant = Purple700,
-    secondary = Color(251, 132, 43),
-    background = Color.Black,
-    onBackground = Color.White,
-    surface = Color.Black,
-    onSurface = Color.White
+    primary = Color(0xFFad3300),
+    primaryVariant = Color(0xFFffdbd0),
+    secondary = Color(0xFF77574d),
+    secondaryVariant = Color(0xFFffdbd0),
+    background = Color.White,
+    onBackground = Color(0xFF201a18),
+    surface = Color.White,
+    onSurface = Color(0xFF201a18),
 
     /* Other default colors to override
     background = Color.White,
@@ -45,11 +46,7 @@ fun SwingSpeedTrackerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
-    }
+    val colors = DarkColorPalette
 
     val view = LocalView.current
     if (!view.isInEditMode) {
