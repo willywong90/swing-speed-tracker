@@ -36,15 +36,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        checkBluetoothPermissions()
-        initializeBluetooth()
-
-        setContent {
-            MainScreen()
-        }
-    }
-
-    private fun checkBluetoothPermissions() {
         getPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { hasPermission ->
             if (!hasPermission) {
                 Toast.makeText(applicationContext, "No permission to perform this action", Toast.LENGTH_SHORT)
@@ -62,6 +53,15 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        checkBluetoothPermissions()
+        initializeBluetooth()
+
+        setContent {
+            MainScreen()
+        }
+    }
+
+    private fun checkBluetoothPermissions() {
         if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)) {
             getPermission.launch(Manifest.permission.BLUETOOTH_SCAN)
         }

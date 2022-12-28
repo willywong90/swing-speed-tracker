@@ -31,11 +31,6 @@ private val UUID_SENSOR_CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1
 @RequiresApi(Build.VERSION_CODES.M)
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val applicationContext = getApplication<Application>().applicationContext
-    //private var isSensorConnected by mutableStateOf(false)
-    private var bluetoothLeScanCallback: ScanCallback
-    private lateinit var bluetoothSensor: BluetoothDevice
-    private lateinit var bluetoothGattCallback: BluetoothGattCallback
-    //val sensorData = mutableStateListOf<TrackerData>()
     private val _uiState = MutableStateFlow(TrackerUiState())
     val uiState: StateFlow<TrackerUiState> = _uiState.asStateFlow()
 
@@ -43,10 +38,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val bluetoothManager = applicationContext.getSystemService(ComponentActivity.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothManager.adapter
     }
+    private val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+    private var bluetoothLeScanCallback: ScanCallback
+    private lateinit var bluetoothGattCallback: BluetoothGattCallback
 
     @SuppressLint("MissingPermission")
     private fun scanForSensor() {
-        val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
         val scanFilters: MutableList<ScanFilter> = ArrayList()
         val scanSettings = ScanSettings.Builder()
             .setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH)
@@ -121,7 +118,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 super.onScanResult(callbackType, result)
                 Log.d(TAG, "FOUND DEVICE " + result.device.address)
 
-                bluetoothSensor = bluetoothAdapter.getRemoteDevice(result.device.address)
+                val bluetoothSensor = bluetoothAdapter.getRemoteDevice(result.device.address)
                 bluetoothSensor.connectGatt(applicationContext, false, bluetoothGattCallback, BluetoothDevice.TRANSPORT_LE)
             }
         }
@@ -139,7 +136,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         Log.e(TAG, "DISCONNECTED FROM GATT SERVER")
 
                         setConnectedStatus(false)
-                        gatt?.close()
+                        gatt?.disconnect()
                     }
                 } else {
                     Log.e(TAG, "DISCONNECTED FROM GATT SERVER")
