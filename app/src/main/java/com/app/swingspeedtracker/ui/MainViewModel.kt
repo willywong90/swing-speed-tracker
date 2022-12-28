@@ -1,4 +1,4 @@
-package com.app.swingspeedtracker
+package com.app.swingspeedtracker.ui
 
 import android.annotation.SuppressLint
 import android.app.Application
@@ -14,6 +14,12 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.*
 import androidx.lifecycle.AndroidViewModel
+import com.app.swingspeedtracker.data.TrackerData
+import com.app.swingspeedtracker.data.TrackerUiState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -25,11 +31,13 @@ private val UUID_SENSOR_CHARACTERISTIC_CONFIG = UUID.fromString("00002902-0000-1
 @RequiresApi(Build.VERSION_CODES.M)
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val applicationContext = getApplication<Application>().applicationContext
-    private var isBluetoothOn by mutableStateOf(false)
+    //private var isSensorConnected by mutableStateOf(false)
     private var bluetoothLeScanCallback: ScanCallback
     private lateinit var bluetoothSensor: BluetoothDevice
     private lateinit var bluetoothGattCallback: BluetoothGattCallback
-    val sensorData = mutableStateListOf<TrackerData>()
+    //val sensorData = mutableStateListOf<TrackerData>()
+    private val _uiState = MutableStateFlow(TrackerUiState())
+    val uiState: StateFlow<TrackerUiState> = _uiState.asStateFlow()
 
     private val bluetoothAdapter: BluetoothAdapter by lazy {
         val bluetoothManager = applicationContext.getSystemService(ComponentActivity.BLUETOOTH_SERVICE) as BluetoothManager
@@ -70,32 +78,40 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return hex.joinToString(separator = "").toInt(16)
     }
 
-    fun getBluetoothState(): Boolean {
-        return isBluetoothOn
-    }
-
     fun getAveragedStats(): TrackerData {
         var averageClubSpeed = 0.0
         var averageBallSpeed = 0.0
         var averageCarry = 0.0
 
-        if (sensorData.isNotEmpty()) {
-            sensorData.forEach {
+        if (_uiState.value.sensorData.isNotEmpty()) {
+            _uiState.value.sensorData.forEach {
                 averageClubSpeed += it.clubSpeed
                 averageBallSpeed += it.ballSpeed
                 averageCarry += it.carry
             }
 
-            averageClubSpeed /= sensorData.size
-            averageBallSpeed /= sensorData.size
-            averageCarry /= sensorData.size
+            averageClubSpeed /= _uiState.value.sensorData.size
+            averageBallSpeed /= _uiState.value.sensorData.size
+            averageCarry /= _uiState.value.sensorData.size
         }
 
         return TrackerData(averageClubSpeed, averageBallSpeed, averageCarry, 0)
     }
 
+    private fun setConnectedStatus(value: Boolean) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                isSensorConnected = value
+            )
+        }
+    }
+
     fun clearHistory() {
-        sensorData.clear()
+        _uiState.update { currentState ->
+            currentState.copy(
+                sensorData = listOf()
+            )
+        }
     }
 
     init {
@@ -117,18 +133,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     if (newState == BluetoothProfile.STATE_CONNECTED) {
                         Log.d(TAG, "CONNECTED TO GATT SERVER")
 
-                        isBluetoothOn = true
+                        setConnectedStatus(true)
                         gatt?.discoverServices()
                     } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                         Log.e(TAG, "DISCONNECTED FROM GATT SERVER")
 
-                        isBluetoothOn = false
+                        setConnectedStatus(false)
                         gatt?.close()
                     }
                 } else {
                     Log.e(TAG, "DISCONNECTED FROM GATT SERVER")
 
-                    isBluetoothOn = false
+                    setConnectedStatus(false)
                     gatt?.close()
                 }
             }
@@ -145,7 +161,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     }
                 } else {
                     Log.e(TAG, "Service discovery failed")
-                    isBluetoothOn = false
+
+                    setConnectedStatus(false)
                     gatt?.close()
                 }
             }
@@ -161,7 +178,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             String.format("%02X", it)
                         }
                         Log.d(TAG, "DATA RECEIVED: $hexString")
-                        sensorData.add(0, convertData(data))
+
+                        val newList = _uiState.value.sensorData.toMutableList()
+                        newList.add(0, convertData(data))
+
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                sensorData = newList
+                            )
+                        }
                     }
                 }
             }
