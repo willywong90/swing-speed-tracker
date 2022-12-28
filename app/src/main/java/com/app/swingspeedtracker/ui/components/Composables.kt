@@ -1,4 +1,4 @@
-package com.app.swingspeedtracker
+package com.app.swingspeedtracker.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

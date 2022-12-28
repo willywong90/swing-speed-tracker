@@ -1,4 +1,4 @@
-package com.app.swingspeedtracker
+package com.app.swingspeedtracker.data
 
 private const val MS_TO_MPH_CONVERSION = 2.23694
 private val CLUB_LABEL = listOf("W1", "W3", "W5", "W7", "W9", "U2", "U3", "U4", "U5", "U6", "I3", "I4", "I5", "I6", "I7", "I8", "I9", "PW", "AW", "Sw", "LW", "PT")

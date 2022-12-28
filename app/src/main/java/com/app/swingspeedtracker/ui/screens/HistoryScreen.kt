@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.app.swingspeedtracker.CardFrame
-import com.app.swingspeedtracker.TrackerData
+import com.app.swingspeedtracker.data.TrackerData
+import com.app.swingspeedtracker.ui.components.CardFrame
 import com.app.swingspeedtracker.ui.components.TrackerList
 import com.app.swingspeedtracker.ui.components.TrackerListItem
 

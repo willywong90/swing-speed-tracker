@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.app.swingspeedtracker.TrackerData
+import com.app.swingspeedtracker.data.TrackerData
 
 @Composable
 fun TrackerList(data: List<TrackerData>) {

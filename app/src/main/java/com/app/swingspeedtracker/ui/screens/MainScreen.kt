@@ -7,13 +7,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.app.swingspeedtracker.MainViewModel
+import com.app.swingspeedtracker.ui.MainViewModel
 import com.app.swingspeedtracker.ui.components.BottomNavigationBar
 import com.app.swingspeedtracker.ui.components.NavigationItem
 import com.app.swingspeedtracker.ui.theme.SwingSpeedTrackerTheme
@@ -24,6 +26,7 @@ fun MainScreen(
     viewModel: MainViewModel = viewModel()
 ) {
     val navController = rememberNavController()
+    val uiState by viewModel.uiState.collectAsState()
 
     SwingSpeedTrackerTheme {
         Scaffold(
@@ -33,13 +36,13 @@ fun MainScreen(
                     NavHost(navController, startDestination = NavigationItem.Home.route) {
                         composable(NavigationItem.Home.route) {
                             TrackerScreen(
-                                dataList = viewModel.sensorData,
-                                bluetoothStatus = viewModel.getBluetoothState()
+                                dataList = uiState.sensorData,
+                                bluetoothStatus = uiState.isSensorConnected
                             )
                         }
                         composable(NavigationItem.History.route) {
                             HistoryScreen(
-                                dataList = viewModel.sensorData,
+                                dataList = uiState.sensorData,
                                 averageStats = viewModel.getAveragedStats(),
                                 clearHistory = { viewModel.clearHistory() }
                             )
