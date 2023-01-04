@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,5 +43,25 @@ fun CardFrame(
                 content()
             }
         }
+    }
+}
+
+@Composable
+fun StyledButton(
+    text: String,
+    onClick: () -> Unit,
+    isEnabled: Boolean = true
+) {
+    Button(
+        enabled = isEnabled,
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.secondary,
+            disabledBackgroundColor = MaterialTheme.colors.secondary.copy(0.4f)
+        ),
+        modifier = Modifier
+            .padding(bottom = 10.dp)
+    ) {
+        Text(text = text)
     }
 }
