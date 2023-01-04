@@ -44,7 +44,7 @@ fun MainScreen(
                             HistoryScreen(
                                 dataList = uiState.sensorData,
                                 averageStats = viewModel.getAveragedStats(),
-                                clearHistory = { viewModel.clearHistory() }
+                                onEvent = viewModel::onEvent
                             )
                         }
                     }

@@ -7,7 +7,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.app.swingspeedtracker.data.TrackerData
+import com.app.swingspeedtracker.ui.UiEvent
 import com.app.swingspeedtracker.ui.components.CardFrame
+import com.app.swingspeedtracker.ui.components.StyledButton
 import com.app.swingspeedtracker.ui.components.TrackerList
 import com.app.swingspeedtracker.ui.components.TrackerListItem
 
@@ -15,34 +17,42 @@ import com.app.swingspeedtracker.ui.components.TrackerListItem
 fun HistoryScreen(
     dataList: List<TrackerData>,
     averageStats: TrackerData,
-    clearHistory: () -> Unit
+    onEvent: (event: UiEvent) -> Unit
 ) {
     Surface (
         modifier = Modifier.fillMaxSize()
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxHeight()
+            modifier = Modifier.fillMaxSize()
         ) {
-            CardFrame("AVERAGES") {
+            CardFrame(
+                label = "AVERAGES"
+            ) {
                 TrackerListItem(averageStats)
             }
 
-            Button(
-                enabled = dataList.isNotEmpty(),
-                onClick = clearHistory,
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = MaterialTheme.colors.secondary,
-                    disabledBackgroundColor = MaterialTheme.colors.secondary.copy(0.4f)
-                ),
-                modifier = Modifier
-                    .padding(bottom = 10.dp)
-            ) {
-                Text(text = "Clear History")
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth()
+            ){
+                StyledButton(
+                    text = "Clear Selection",
+                    onClick = { onEvent(UiEvent.ClearSelection) },
+                    isEnabled = dataList.any { data -> data.isSelected }
+                )
+
+                StyledButton(
+                    text = "Clear History",
+                    onClick = { onEvent(UiEvent.ClearHistory) },
+                    isEnabled = dataList.isNotEmpty()
+                )
             }
 
-            TrackerList(dataList)
+            TrackerList(
+                dataList = dataList,
+                onEvent = onEvent
+            )
         }
     }
 }
