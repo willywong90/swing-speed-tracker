@@ -1,5 +1,6 @@
 package com.app.swingspeedtracker.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,9 +14,13 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.app.swingspeedtracker.data.TrackerData
+import com.app.swingspeedtracker.ui.UiEvent
 
 @Composable
-fun TrackerList(data: List<TrackerData>) {
+fun TrackerList(
+    dataList: List<TrackerData>,
+    onEvent: ((event: UiEvent) -> Unit)? = null
+) {
     CompositionLocalProvider(LocalContentColor provides Color.White) {
         Column {
             Row(
@@ -30,11 +35,17 @@ fun TrackerList(data: List<TrackerData>) {
                 modifier = Modifier.fillMaxHeight()
             ) {
                 items(
-                    items = data,
-                    itemContent = {
-                        TrackerListItem(data = it)
-                        Divider()
-                    })
+                    items = dataList
+                ) {
+                    TrackerListItem(
+                        data = it
+                    ) {
+                        if (onEvent != null) {
+                            onEvent(UiEvent.ItemSelected(it))
+                        }
+                    }
+                    Divider()
+                }
             }
         }
     }
@@ -57,20 +68,38 @@ fun RowScope.TrackerHeader(text: String) {
 }
 
 @Composable
-fun TrackerListItem(data: TrackerData) {
+fun TrackerListItem(
+    data: TrackerData,
+    onClick: (() -> Unit)? = null
+) {
     val displayClubSpeed = data.clubSpeedMph ?: 0.0
     val displayBallSpeed = data.ballSpeedMph ?: 0.0
     val displayCarry = data.carry ?: 0.0
     val displayCarryUnit = data.carryUnit ?: ""
     val displaySmash = data.smashFactor ?: 0.0
 
+    var backgroundColor = MaterialTheme.colors.background
+    var color = MaterialTheme.colors.onBackground
+
+    if (data.isSelected) {
+        backgroundColor = MaterialTheme.colors.secondary
+        color = MaterialTheme.colors.onSecondary
+    }
+
     Card (
         shape = RectangleShape,
+        backgroundColor = backgroundColor,
+        contentColor = color,
         modifier = Modifier
             .fillMaxWidth()
+            .clickable {
+                if (onClick != null) {
+                    onClick()
+                }
+            }
     ) {
         Row (
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             TrackerItemValue(value = String.format("%.2f", displayClubSpeed))
             TrackerItemValue(value = String.format("%.2f", displayBallSpeed))
