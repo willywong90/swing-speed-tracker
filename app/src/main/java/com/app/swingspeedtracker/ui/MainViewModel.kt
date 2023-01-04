@@ -75,26 +75,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return hex.joinToString(separator = "").toInt(16)
     }
 
-    fun getAveragedStats(): TrackerData {
-        var averageClubSpeed = 0.0
-        var averageBallSpeed = 0.0
-        var averageCarry = 0.0
-
-        if (_uiState.value.sensorData.isNotEmpty()) {
-            _uiState.value.sensorData.forEach {
-                averageClubSpeed += it.clubSpeed
-                averageBallSpeed += it.ballSpeed
-                averageCarry += it.carry
-            }
-
-            averageClubSpeed /= _uiState.value.sensorData.size
-            averageBallSpeed /= _uiState.value.sensorData.size
-            averageCarry /= _uiState.value.sensorData.size
-        }
-
-        return TrackerData(averageClubSpeed, averageBallSpeed, averageCarry, 0)
-    }
-
     private fun setConnectedStatus(value: Boolean) {
         _uiState.update { currentState ->
             currentState.copy(
@@ -103,11 +83,62 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun clearHistory() {
+    private fun clearHistory() {
         _uiState.update { currentState ->
             currentState.copy(
                 sensorData = listOf()
             )
+        }
+    }
+
+    private fun clearSelection() {
+        _uiState.update { currentState ->
+            currentState.copy(
+                sensorData = currentState.sensorData.map { item -> item.copy(isSelected = false) }
+            )
+        }
+    }
+
+    fun getAveragedStats(): TrackerData {
+        var averageClubSpeed = 0.0
+        var averageBallSpeed = 0.0
+        var averageCarry = 0.0
+
+        var list = _uiState.value.sensorData.filter { data -> data.isSelected }
+
+        if (list.isEmpty())
+            list = _uiState.value.sensorData
+
+        if (list.isNotEmpty()) {
+            averageClubSpeed = list.map { item -> item.clubSpeed }.average()
+            averageBallSpeed = list.map { item -> item.ballSpeed }.average()
+            averageCarry = list.map { item -> item.distance }.average()
+        }
+
+        return TrackerData(averageClubSpeed, averageBallSpeed, averageCarry, 0)
+    }
+
+    fun onEvent(event: UiEvent) {
+        when(event) {
+            is UiEvent.ItemSelected -> {
+                val newSensorDataValue = _uiState.value.sensorData.map { item ->
+                    if (item == event.selectedObject)
+                        item.copy(isSelected = !item.isSelected)
+                    else
+                        item
+                }
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        sensorData = newSensorDataValue
+                    )
+                }
+            }
+            is UiEvent.ClearSelection -> {
+                clearSelection()
+            }
+            is UiEvent.ClearHistory -> {
+                clearHistory()
+            }
         }
     }
 
